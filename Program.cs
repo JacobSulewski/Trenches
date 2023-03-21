@@ -1,3 +1,3 @@
 ﻿
-using var game = new Trenches.Game1();
+using var game = new Trenches.GameMain();
 game.Run();
