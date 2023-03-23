@@ -4,7 +4,7 @@ using MonoGame.Extended.Entities;
 using MonoGame.Extended.Sprites;
 
 namespace Trenches.Factories;
-class EngineerFactory: UnitFactory {
+class EngineerFactory : UnitFactory {
     public ContentManager Content { private get; init; }
     
     public override Entity Create(){
