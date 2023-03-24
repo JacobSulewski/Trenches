@@ -1,91 +1,105 @@
-﻿using Autofac;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Extended;
-using MonoGame.Extended.Entities;
-using Trenches.Factories;
+﻿using Microsoft.Xna.Framework.Input;
+using MonoGame.Extended.Input.InputListeners;
+
+using Trenches.Components;
 using Trenches.Systems;
+using Trenches.Factories;
 
 namespace Trenches;
 class GameMain : GameBase
 {
+    public GameMain() { }
+
     protected override void RegisterDependencies(ContainerBuilder builder)
     {
-        builder.RegisterInstance<GraphicsDevice>(GraphicsDevice);
-        builder.RegisterInstance<ContentManager>(Content);
-        builder.RegisterType<SpriteBatch>();
+        /* RegisterInstance */
+        builder.RegisterInstance(Content);
+        builder.RegisterInstance(new SpriteBatch(GraphicsDevice));
+        builder.RegisterInstance(this)
+            .As<Game>();
+        builder.RegisterInstance(new BoxingViewportAdapter(Window, GraphicsDevice, Width, Height))
+            .As<ViewportAdapter>()
+            .AsImplementedInterfaces();
+
+        /* RegisterType<T> */
+        builder.RegisterType<InfantryFactory>()
+            .PropertiesAutowired()
+            .SingleInstance();
+        builder.RegisterType<EngineerFactory>()
+            .PropertiesAutowired()
+            .SingleInstance();
+
         builder.RegisterType<RenderSystem>()
-               .PropertiesAutowired();
-        builder.Register<OrthographicCamera>(c => 
-                    new OrthographicCamera(c.Resolve<GraphicsDevice>())
-                    {
-                        Zoom = 2,
-                        Origin = Vector2.Zero
-                    })
-               .AsSelf()
-               .As<Camera<Vector2>>()
-               .SingleInstance();
-        builder.RegisterType<EntityFactory>()
-               .PropertiesAutowired()
-               .AsSelf()
-               .SingleInstance();
-        builder.Register<World>(c => 
-                    new WorldBuilder()
-                    .AddSystem(c.Resolve<RenderSystem>())
-                    .Build())
-                .SingleInstance();
+            .PropertiesAutowired();
+        builder.RegisterType<PhysicsSystem>()
+            .PropertiesAutowired();
+
+        /* Register */
+        builder.Register(c => new OrthographicCamera(c.Resolve<ViewportAdapter>())
+                {
+                    Zoom = 4.0f, 
+                    MinimumZoom = 4.0f,
+                    MaximumZoom = 8.0f,
+                })
+            .SingleInstance();
+        builder.Register(c => new InputListenerComponent(
+                c.Resolve<Game>(),
+                c.Resolve<MouseListener>(),
+                c.Resolve<KeyboardListener>()))
+            .SingleInstance();
+        builder.Register(c => new MouseListenerSettings
+                {
+                    ViewportAdapter = c.Resolve<ViewportAdapter>()
+                }.CreateListener())
+            .SingleInstance();
+        builder.Register(c => new KeyboardListenerSettings{}.CreateListener())
+            .SingleInstance();
+        builder.Register(c => new WorldBuilder()
+                .AddSystem(c.Resolve<PhysicsSystem>())
+                .AddSystem(c.Resolve<RenderSystem>())
+                .Build())
+            .SingleInstance();
+    }
+
+    protected override void Initialize()
+    {
+        base.Initialize();
+        Components.Add(Container.Resolve<World>());
+        Components.Add(Container.Resolve<InputListenerComponent>());
     }
 
     protected override void LoadContent()
     {
-        Components.Add(Container.Resolve<World>());
+        var e = Container.Resolve<InfantryFactory>().Create();
+        Container.Resolve<MouseListener>().MouseClicked += (sender, args) => {
+            e.Get<Physics>().Velocity = Vector2.Zero;
+        };
+        Container.Resolve<KeyboardListener>().KeyPressed += (sender, args) => {
+            if( args.Key == Keys.D )
+                e.Get<Physics>().Velocity = new Vector2(100, 0);
+            if( args.Key == Keys.A )
+                e.Get<Physics>().Velocity = new Vector2(-100, 0);
+            if( args.Key == Keys.S )
+                e.Get<Physics>().Velocity = new Vector2(0, 100);
+            if( args.Key == Keys.W )
+                e.Get<Physics>().Velocity = new Vector2(0, -100);
+        };
 
-        /* TOOD: Load maps and collision data more nicely :)
-        _map = Content.Load<TiledMap>("test-map");
-        _renderer = new TiledMapRenderer(GraphicsDevice, _map);
+        var camera = Container.Resolve<OrthographicCamera>();
+        camera.LookAt(Vector2.Zero);
 
-        foreach (var tileLayer in _map.TileLayers)
-        {
-            for (var x = 0; x < tileLayer.Width; x++)
-            {
-                for (var y = 0; y < tileLayer.Height; y++)
-                {
-                    var tile = tileLayer.GetTile((ushort)x, (ushort)y);
-
-                    if (tile.GlobalIdentifier == 1)
-                    {
-                        var tileWidth = _map.TileWidth;
-                        var tileHeight = _map.TileHeight;
-                        _entityFactory.CreateTile(x, y, tileWidth, tileHeight);
-                    }
-                }
-            }
-        } */
-        Container.Resolve<EntityFactory>().CreateInfantryman(new Vector2(1, 1));
-        Container.Resolve<EntityFactory>().CreateEngineer(new Vector2(5, 5));
+        Log.Information(e.Get<Transform2>().Position.ToString());
+        Log.Information(camera.GetViewMatrix().ToString());
     }
 
     protected override void Update(GameTime gameTime)
     {
-        // TODO: Using global shared input state is really bad!
-
-        //var keyboardState = KeyboardExtended.GetState();
-
-        //if (keyboardState.IsKeyDown(Keys.Escape))
-        //    Exit();
-
-        //_renderer.Update(gameTime);
-        //_camera.LookAt(_playerEntity.Get<Transform2>().Position);
-
         base.Update(gameTime);
     }
 
     protected override void Draw(GameTime gameTime)
     {
-        GraphicsDevice.Clear(Color.Black);
-
-        //_renderer.Draw(_camera.GetViewMatrix());
+        GraphicsDevice.Clear(Color.DarkGreen);
 
         base.Draw(gameTime);
     }

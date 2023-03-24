@@ -1,17 +1,16 @@
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
-using MonoGame.Extended.Entities;
-using MonoGame.Extended.Sprites;
+using Trenches.Extensions;
+using Trenches.Components;
 
 namespace Trenches.Factories;
-class EngineerFactory : UnitFactory {
+class EngineerFactory : EntityFactory {
     public ContentManager Content { private get; init; }
     
-    public override Entity Create(){
+    public override Entity Create()
+    {
         var texture = Content.Load<Texture2D>("Sprites/engineer");
-        
-        var entity = base.Create();
-        entity.Attach(new Sprite(texture));
-        return entity;
+        return base.Create()
+                   .Add(new Sprite(texture))
+                   .Add(new BoxCollider(texture.Bounds))
+                   .Add(new Physics{ Speed = 10 });
     }
 }

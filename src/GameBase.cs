@@ -1,7 +1,4 @@
-﻿using Autofac;
-using Microsoft.Xna.Framework;
-
-namespace Trenches;
+﻿namespace Trenches;
 abstract class GameBase : Game
 {
     // ReSharper disable once NotAccessedField.Local
@@ -30,7 +27,15 @@ abstract class GameBase : Game
         var containerBuilder = new ContainerBuilder();
 
         RegisterDependencies(containerBuilder);
-        Container = containerBuilder.Build();
+        try 
+        {
+            Container = containerBuilder.Build();
+        } 
+        catch (Exception)
+        {
+            Log.Logger?.Error("Container failed to build.");
+            throw;
+        }
 
         base.Initialize();
     }

@@ -1,10 +1,3 @@
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using MonoGame.Extended;
-using MonoGame.Extended.Entities;
-using MonoGame.Extended.Entities.Systems;
-using MonoGame.Extended.Sprites;
-
 namespace Trenches.Systems;
 class RenderSystem : EntityDrawSystem
 {
@@ -16,9 +9,7 @@ class RenderSystem : EntityDrawSystem
     private ComponentMapper<Transform2> _transformMapper;
 
     public RenderSystem()
-        : base(Aspect.All(typeof(Transform2)).One(typeof(AnimatedSprite), typeof(Sprite)))
-    {
-    }
+        : base(Aspect.All(typeof(Transform2)).One(typeof(AnimatedSprite), typeof(Sprite))) { }
 
     public override void Initialize(IComponentMapperService mapperService)
     {

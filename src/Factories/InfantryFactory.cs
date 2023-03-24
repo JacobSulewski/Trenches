@@ -1,17 +1,18 @@
-using Microsoft.Xna.Framework.Graphics;
-using Microsoft.Xna.Framework.Content;
-using MonoGame.Extended.Entities;
-using MonoGame.Extended.Sprites;
+using Trenches.Extensions;
+using Trenches.Components;
 
 namespace Trenches.Factories;
-class InfantryFactory : UnitFactory {
+class InfantryFactory : EntityFactory {
     public ContentManager Content { private get; init; }
     
-    public override Entity Create(){
+    public override Entity Create()
+    {
         var texture = Content.Load<Texture2D>("Sprites/infantry");
-        
-        var entity = base.Create();
-        entity.Attach(new Sprite(texture));
-        return entity;
+        var collider = new BoxCollider(texture.Bounds);
+        return base.Create()
+                   .Add(new Sprite(texture))
+                   .Add(collider)
+                   .Add((Transform2)collider)
+                   .Add(new Physics{ Speed = 10 });
     }
 }
