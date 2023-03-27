@@ -23,17 +23,9 @@ abstract class GameBase : Game
     protected override void Initialize()
     {
         var containerBuilder = new ContainerBuilder();
-
         RegisterDependencies(containerBuilder);
-        try 
-        {
-            Container = containerBuilder.Build();
-        } 
-        catch (Exception)
-        {
-            Log.Logger?.Error("Container failed to build.");
-            throw;
-        }
+        Container = containerBuilder.Build();
+        
         base.Initialize();
     }
     protected abstract void RegisterDependencies(ContainerBuilder builder);
