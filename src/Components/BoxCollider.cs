@@ -1,31 +1,30 @@
-using Trenches.Extensions;
-
 namespace Trenches.Components;
-class BoxCollider : Transform2, ICollisionActor
+class BoxCollider : Collider
 {
-    public bool Visible { get; set; }
-    public float Width { get; set; }
-    public float Height { get; set; }
+    Sprite _sprite;
+    float? _width;
+    float? _height;
+    public float Width
+        => _width ?? _sprite.GetBoundingRectangle(this).Width;
+    public float Height
+        => _height ?? _sprite.GetBoundingRectangle(this).Width;
+    public Size2 Size
+        => new(Width, Height);
     public RectangleF BoundingRectangle 
-    { 
-        get => new RectangleF(Position, new Vector2(Width, Height));
-        set => (Position, (Width, Height)) = value;
-    }
-    public IShapeF Bounds => BoundingRectangle;
-
-    public BoxCollider(RectangleF rect) {
-        BoundingRectangle = rect;
-    }
-    public BoxCollider(float x, float y, float width, float height)
-        : this(new RectangleF(x, y, width, height)) { }
-
-    public virtual void OnCollision(CollisionEventArgs collisionInfo)
+        => new(Position - new Vector2(Width, Height) / 2, new(Width, Height));
+    public override IShapeF Bounds 
+        => BoundingRectangle;
+    public BoxCollider(Size2 size) 
+        => (_width, _height) = (size);
+    public BoxCollider(Sprite sprite)
+        => (_sprite) = (sprite);
+    public override void OnCollision(CollisionEventArgs collisionInfo)
     {
         System.Console.WriteLine("Collided: " + collisionInfo);
     }
-    public void Draw(SpriteBatch spriteBatch)
+    public override void Draw(SpriteBatch spriteBatch)
     {
-        if (Visible)
-            spriteBatch.DrawRectangle(BoundingRectangle, Color.Red);
+        // TODO Thickness should scale with camera zoom
+        spriteBatch.DrawRectangle(BoundingRectangle, Color, 1.5f, LayerDepth.Debug);
     }
 }

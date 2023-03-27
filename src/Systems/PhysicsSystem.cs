@@ -5,7 +5,6 @@ class PhysicsSystem : EntityProcessingSystem
 {
     private ComponentMapper<Transform2> _transformMapper;
     private ComponentMapper<Physics> _physicsMapper;
-
     public PhysicsSystem()
         : base(Aspect.All(typeof(Transform2), typeof(Physics))) { }
     public override void Initialize(IComponentMapperService mapperService)
@@ -13,7 +12,6 @@ class PhysicsSystem : EntityProcessingSystem
         _transformMapper = mapperService.GetMapper<Transform2>();
         _physicsMapper = mapperService.GetMapper<Physics>();
     }
-
     public override void Process(GameTime gameTime, int entityId)
     {
         var transform = _transformMapper.Get(entityId);
@@ -21,6 +19,7 @@ class PhysicsSystem : EntityProcessingSystem
         var elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         transform.Position += physics.Velocity * elapsedTime;
-        physics.Velocity += physics.Acceleration * elapsedTime;
+        // See Physics Component for explanation
+        //physics.Velocity += physics.Acceleration * elapsedTime;
     }
 }

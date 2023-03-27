@@ -5,6 +5,9 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.File(path: "logs/logfile.log")
     .CreateLogger();
 
+Log.Information("Starting");
+System.Console.WriteLine("Console");
+System.Diagnostics.Debug.WriteLine("Debug");
 try 
 {
     game.Run();
@@ -14,4 +17,4 @@ catch (Exception ex)
     Log.Logger?.Error(ex.ToString());
     throw;
 }
-Log.Logger?.Fatal("Exiting\n");
+Log.Information("Exiting");
