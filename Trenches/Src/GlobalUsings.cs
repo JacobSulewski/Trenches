@@ -10,5 +10,3 @@ global using MonoGame.Extended.Entities;
 global using MonoGame.Extended.Collisions;
 global using MonoGame.Extended.Entities.Systems;
 global using MonoGame.Extended.Sprites;
-
-global using Trenches.Utils;

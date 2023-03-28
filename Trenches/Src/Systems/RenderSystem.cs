@@ -4,12 +4,12 @@ using Trenches.Pathing;
 namespace Trenches.Systems;
 class RenderSystem : EntityDrawSystem
 {
-    private ComponentMapper<AnimatedSprite> _animatedSpriteMapper;
-    private ComponentMapper<Sprite> _spriteMapper;
-    private ComponentMapper<Transform2> _transformMapper;
-    private ComponentMapper<Collider> _colliderMapper;
+    private ComponentMapper<AnimatedSprite> _animatedSprites;
+    private ComponentMapper<Sprite> _sprites;
+    private ComponentMapper<Transform2> _transforms;
+    private ComponentMapper<Collider> _colliders;
     public bool Debug;
-    public GridGraph Grid 
+    public Grid<int> Grid 
         { private get; init; }
     required public SpriteBatch SpriteBatch 
         { private get; init; }
@@ -20,22 +20,19 @@ class RenderSystem : EntityDrawSystem
     public RenderSystem()
         : base(Aspect.All(typeof(Transform2)).One(typeof(AnimatedSprite), typeof(Sprite), typeof(Collider))) { }
     public override void Initialize(IComponentMapperService mapperService)
-    {
-        _transformMapper = mapperService.GetMapper<Transform2>();
-        _animatedSpriteMapper = mapperService.GetMapper<AnimatedSprite>();
-        _spriteMapper = mapperService.GetMapper<Sprite>();
-        _colliderMapper = mapperService.GetMapper<Collider>();
-    }
+        => (_transforms, _animatedSprites, _sprites, _colliders) = 
+            (mapperService.Get<Transform2, AnimatedSprite, Sprite, Collider>());
+
     public override void Draw(GameTime gameTime)
     {
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: Camera.GetViewMatrix());
 
         foreach (var entity in ActiveEntities)
         {
-            var transform = _transformMapper.Get(entity);
-            var sprite = _animatedSpriteMapper.Has(entity)
-                ? _animatedSpriteMapper.Get(entity)
-                : _spriteMapper.Get(entity);
+            var transform = _transforms.Get(entity);
+            var sprite = _animatedSprites.Has(entity)
+                ? _animatedSprites.Get(entity)
+                : _sprites.Get(entity);
 
             if (sprite is AnimatedSprite animatedSprite)
                 animatedSprite.Update(gameTime.GetElapsedSeconds());
@@ -43,13 +40,13 @@ class RenderSystem : EntityDrawSystem
             SpriteBatch.Draw(sprite, transform);
 
             if (Debug)
-                _colliderMapper.Get(entity)?.Draw(SpriteBatch);
+                _colliders.Get(entity)?.Draw(SpriteBatch);
         }
         
         if (Debug)
         {
             Grid?.Draw(SpriteBatch);
-            Utils.Utils.DrawText(Camera.Position.ToString(), Camera.Center, Color.Black, LayerDepth.Debug);
+            Utils.DrawText(Camera.Position.ToString(), Camera.Center, Color.Black, LayerDepth.Debug);
         }
         SpriteBatch.End();
     }

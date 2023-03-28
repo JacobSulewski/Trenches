@@ -27,7 +27,7 @@ public class GameMain : GameBase
         builder.RegisterInstance(this)
             .As<Game>();
         builder.Register(c => new CollisionComponent(new(0, 0, Width, Height)));
-        builder.Register(c => new GridGraph(Width, Height, 32));
+        builder.Register(c => new Grid<int>(0, 0, Width, Height, 32));
     }
     private void RegisterGraphics(ContainerBuilder builder)
     {
@@ -94,7 +94,7 @@ public class GameMain : GameBase
         base.Initialize();
         Components.Add(Container.Resolve<World>());
         Components.Add(Container.Resolve<InputListenerComponent>());
-        Utils.Utils.Initialize(Container.Resolve<ContentManager>(), Container.Resolve<SpriteBatch>());
+        Utils.Initialize(Container.Resolve<ContentManager>(), Container.Resolve<SpriteBatch>());
         BindControls();
     }
 

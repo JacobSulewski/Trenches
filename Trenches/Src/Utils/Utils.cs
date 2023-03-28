@@ -1,6 +1,6 @@
 using MonoGame.Extended.BitmapFonts;
 
-namespace Trenches.Utils;
+namespace Trenches;
 public static class Utils 
 {
     private static ContentManager Content;

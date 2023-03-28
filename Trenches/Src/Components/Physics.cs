@@ -38,6 +38,6 @@ class Physics {
         => (Speed, _magnitude) = (speed, speed);
     public override string ToString()
     {
-        return $"Physics: [Speed: {Speed}, Magnitude: {Magnitude}, Direction: {Direction}, Velocity: {Velocity}]";
+        return $"{{Speed: {Speed}, Velocity: {Velocity}}}";
     }
 }

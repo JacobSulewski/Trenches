@@ -1,4 +1,4 @@
-namespace Trenches.Utils;
+namespace Trenches;
 public static class LayerDepth
 {
     public const float Background = 0f;
