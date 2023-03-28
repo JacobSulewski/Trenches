@@ -2,7 +2,9 @@
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
-    .WriteTo.File(path: "logs/logfile.log")
+    .WriteTo.Console()
     .CreateLogger();
+
+Log.Information("Hello from console");
 
 game.Run();

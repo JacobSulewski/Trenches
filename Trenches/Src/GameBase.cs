@@ -1,5 +1,5 @@
 ﻿namespace Trenches;
-abstract class GameBase : Game
+public abstract class GameBase : Game
 {
     // ReSharper disable once NotAccessedField.Local
     protected readonly GraphicsDeviceManager GraphicsDeviceManager;

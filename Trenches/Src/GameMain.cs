@@ -8,7 +8,7 @@ using Trenches.Factories;
 using Trenches.Pathing;
 
 namespace Trenches;
-class GameMain : GameBase
+public class GameMain : GameBase
 {
     public GameMain(int width = 1200, int height = 800)
         : base(width, height) { }
@@ -116,9 +116,9 @@ class GameMain : GameBase
         {
             if (args.Button == MouseButton.Left)
             {
-                infantryman.Add<UnitCommand>(new Move(camera.WorldToScreen(args.Position)));
-                Log.Debug($"WorldToScreen: {camera.ScreenToWorld(args.Position)}");
-                Log.Debug($"ScreenToWorld: {camera.WorldToScreen(args.Position)}");
+                infantryman.Add<UnitCommand>(new Move(camera.ScreenToWorld(args.Position)));
+                Log.Debug($"WorldToScreen: {camera.WorldToScreen(args.Position)}");
+                Log.Debug($"ScreenToWorld: {camera.ScreenToWorld(args.Position)}");
                 Log.Information($"Move from : {infantryman.Get<Transform2>().Position}");
                 Log.Information($"Move to : {args.Position}");
             }
@@ -143,7 +143,7 @@ class GameMain : GameBase
             if (args.Key == Keys.G)
                 renderer.Debug = ! renderer.Debug;
             if (args.Key == Keys.Space)
-                Log.Information($"Position: {infantryman.Get<Transform2>().Position}\nPhysics: {infantryman.Get<Physics>().ToString()}");
+                Log.Information($"Position: {infantryman.Get<Transform2>().Position}");
         };
         keyboard.KeyReleased += (sender, args) => 
         {
