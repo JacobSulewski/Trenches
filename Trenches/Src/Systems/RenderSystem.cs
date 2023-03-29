@@ -46,7 +46,7 @@ class RenderSystem : EntityDrawSystem
         if (Debug)
         {
             Grid?.Draw(SpriteBatch);
-            Utils.DrawText(Camera.Position.ToString(), Camera.Center, Color.Black, LayerDepth.Debug);
+            SpriteBatch.DrawText(Camera.Position.ToString(), Camera.Position, Color.Black, LayerDepth.Debug);
         }
         SpriteBatch.End();
     }

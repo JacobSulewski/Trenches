@@ -5,6 +5,4 @@ Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
     .CreateLogger();
 
-Log.Information("Hello from console");
-
 game.Run();

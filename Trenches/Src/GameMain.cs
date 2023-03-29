@@ -10,7 +10,7 @@ using Trenches.Pathing;
 namespace Trenches;
 public class GameMain : GameBase
 {
-    public GameMain(int width = 1200, int height = 800)
+    public GameMain(int width = 800, int height = 480)
         : base(width, height) { }
     protected override void RegisterDependencies(ContainerBuilder builder)
     {
@@ -27,7 +27,8 @@ public class GameMain : GameBase
         builder.RegisterInstance(this)
             .As<Game>();
         builder.Register(c => new CollisionComponent(new(0, 0, Width, Height)));
-        builder.Register(c => new Grid<int>(0, 0, Width, Height, 32));
+        builder.Register(c => new Grid<int>(new (0, 0, Width, Height), new(32, 32)))
+            .SingleInstance();
     }
     private void RegisterGraphics(ContainerBuilder builder)
     {
@@ -35,11 +36,7 @@ public class GameMain : GameBase
         builder.RegisterInstance(new BoxingViewportAdapter(Window, GraphicsDevice, Width, Height))
             .As<ViewportAdapter>()
             .AsImplementedInterfaces();
-        builder.Register(c => new OrthographicCamera(c.Resolve<ViewportAdapter>())
-                {
-                    Position = Vector2.Zero,
-                    Zoom = 1.25f
-                })
+        builder.Register(c => new OrthographicCamera(c.Resolve<ViewportAdapter>()))
             .SingleInstance();
     }
     private void RegisterInput(ContainerBuilder builder)
@@ -94,7 +91,7 @@ public class GameMain : GameBase
         base.Initialize();
         Components.Add(Container.Resolve<World>());
         Components.Add(Container.Resolve<InputListenerComponent>());
-        Utils.Initialize(Container.Resolve<ContentManager>(), Container.Resolve<SpriteBatch>());
+        Utils.Initialize(Container.Resolve<ContentManager>());
         BindControls();
     }
 
@@ -106,32 +103,31 @@ public class GameMain : GameBase
         var mouse = Container.Resolve<MouseListener>();
         var renderer = Container.Resolve<RenderSystem>();
         var camera = Container.Resolve<OrthographicCamera>();
-        var infantryman = Container.Resolve<InfantryFactory>().Create().Add<Camera>();
+        var infantryman = Container.Resolve<InfantryFactory>().Create();
+        var grid = Container.Resolve<Grid<int>>();
 
-        Log.Information($"Camera: {camera.Position}");
-        Log.Information($"ViewportAdapter Bounds: {Container.Resolve<ViewportAdapter>().BoundingRectangle}");
-        Log.Information($"ViewportAdapter Bounds: {Container.Resolve<ViewportAdapter>().Viewport}");
+        var entity = Container.Resolve<World>().CreateEntity().Add<Transform2>(new()).Add<Physics>(new(100)).Add<Camera>(new());
 
         mouse.MouseClicked += (sender, args) => 
         {
             if (args.Button == MouseButton.Left)
             {
-                infantryman.Add<UnitCommand>(new Move(camera.ScreenToWorld(args.Position)));
-                Log.Debug($"WorldToScreen: {camera.WorldToScreen(args.Position)}");
-                Log.Debug($"ScreenToWorld: {camera.ScreenToWorld(args.Position)}");
-                Log.Information($"Move from : {infantryman.Get<Transform2>().Position}");
-                Log.Information($"Move to : {args.Position}");
+                Log.Information($"MouseWorld:{args.Position}"); // Gives the position on the screen
+                Log.Information($"ScreenToWorld{camera.ScreenToWorld(args.Position)}");
+                Log.Information($"Camera:{camera.Position} Rectangle:{camera.BoundingRectangle} Center:{camera.Center} Origin:{camera.Origin}");
+                Log.Information($"Infantryman:{infantryman.Get<Transform2>().Position} World:{infantryman.Get<Transform2>().WorldPosition}");
+                Log.Information($"Entity:{entity.Get<Transform2>().Position} World:{entity.Get<Transform2>().WorldPosition}");
+                Log.Debug("");
             }
             if (args.Button == MouseButton.Right)
             {
-                infantryman.Detach<UnitCommand>();
-                infantryman.Get<Physics>().Direction = Vector2.Zero;
+                grid[0,0]++;
+                Log.Information($"Data:{grid[0, 0]}");
             }
         };
         keyboard.KeyPressed += (sender, args) => 
         {
-            var physics = infantryman.Get<Physics>();
-            Log.Information(physics.ToString());
+            var physics = entity.Get<Physics>();
             if (args.Key == Keys.D)
                 physics.Direction += Vector2.UnitX;
             if (args.Key == Keys.A)
@@ -142,12 +138,10 @@ public class GameMain : GameBase
                 physics.Direction -= Vector2.UnitY;
             if (args.Key == Keys.G)
                 renderer.Debug = ! renderer.Debug;
-            if (args.Key == Keys.Space)
-                Log.Information($"Position: {infantryman.Get<Transform2>().Position}");
         };
         keyboard.KeyReleased += (sender, args) => 
         {
-            var physics = infantryman.Get<Physics>();
+            var physics = entity.Get<Physics>();
             if( args.Key == Keys.D || args.Key == Keys.A )
                 physics.Direction *= Vector2.UnitY;
             if( args.Key == Keys.S ||  args.Key == Keys.W)

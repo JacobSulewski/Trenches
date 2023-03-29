@@ -1,66 +1,91 @@
 namespace Trenches.Pathing;
 class Grid<T>
 {
-    private T[,] _cells;
-    public readonly int CellSize;
-    public Vector2 Position
-        { get; }
-    public int Width 
-        { get; }
-    public int Height
-        { get; }
-    public Grid(int x, int y, int width, int height, int cellSize) 
-    {
-         (Position, Width, Height, CellSize) = 
-            (new(x, y), width, height, cellSize);
-
-         _cells = new T[Width / CellSize, Height / CellSize];
-         Log.Information($"()");
-         for (int row = 0; row < Width / CellSize; ++row)
-            for (int col = 0; col < Height / CellSize; ++col)
-                _cells[row, col] = default(T);
+    private Cell<T>[,] _cells;
+    public readonly Vector2 Position;
+    public readonly Size2 CellSize;
+    public readonly Size2 Size;
+    public int Rows
+        => (int)(Size.Height / CellSize.Height);
+    public int Cols
+        => (int)(Size.Width / CellSize.Width);
+    public Grid(RectangleF rect, Point2 cellSize) 
+    {     
+        ((Position, Size), CellSize) = (rect, cellSize);
+        _cells = new Cell<T>[Rows, Cols]; 
+        for (int row = 0; row < Rows; ++row)
+            for (int col = 0; col < Cols; ++col)
+                _cells[row, col] = new Cell<T>
+                    {
+                        Position = Position + (new Vector2(row, col) * CellSize),
+                        Size = CellSize,
+                        Row = row,
+                        Col = col
+                    };
     }
-
-
-
-    public ValueTuple<int, int> ScreenToIndex(Vector2 position)
-    {
-        int row = (int)(position.X - Position.X) / CellSize;
-        int col = (int)(position.Y - Position.Y) / CellSize;
-        return (row, col);
-    }
-
+    public Point ScreenToIndex(Vector2 position)
+        => (Size)(Size2)((position - Position) / CellSize);
+    public Vector2 IndexToScreen(int row, int col)
+        => (new Vector2(row, col) * CellSize) + Position;
+    /* This is used to index from a world position */
     public T this[Vector2 position] 
     {
         get
         {
             var (row, col) = ScreenToIndex(position);
-            return _cells[row, col];
+            if (row >= Rows || col >= Cols || row < 0 || col < 0)
+                return default(T);
+            return _cells[row, col].Data;
         }
         set
         {
             var (row, col) = ScreenToIndex(position);
-            _cells[row, col] = value;
+            if (row >= Rows || col >= Cols || row < 0 || col < 0)
+                return;
+            _cells[row, col].Data = value;
         }
     }
-    public T this[float x, float y] 
+    /* This is used to index from a Grid index */
+    public T this[int row, int col] 
     { 
-        get => this[new(x, y)];
-        set => this[new(x,y)] = value;
+        get 
+            => _cells[row, col].Data;
+        set 
+            => _cells[row, col].Data = value;
     }
 
+    public void Set(Vector2 position, T value)
+    {
+        var (row, col) = ScreenToIndex(position);
+        if (row >= Rows || col >= Cols || row < 0 || col < 0)
+            return;
+        _cells[row, col].Data = value;
+    }
     public void Draw(SpriteBatch spriteBatch)
     {
-        // TODO thickness should scale with camera zoom
-        for (int i = 0; i < Width; i += CellSize)
-            for (int j = 0; j < Height; j += CellSize)
-            {
-                var offset = Position + new Vector2(i, j);
-                var size = Vector2.One * (CellSize + 1);
-                var (row, col) = ScreenToIndex(offset);
-                spriteBatch.DrawRectangle(new(offset, size), Color.Black, 1f, LayerDepth.Debug);
-                Log.Debug($"[{row}, {col}], {_cells.GetUpperBound(0)} {_cells.GetUpperBound(1)}");
-               // Utils.DrawText(_cells[row, col].ToString(), offset, Color.White, LayerDepth.Debug);
-            } 
+        foreach (var cell in _cells)
+            cell.Draw(spriteBatch);
     }
+
+    public class Cell<U>
+    {
+        protected Color Color 
+            { get; set; } = Color.Black;
+        required public Vector2 Position
+            { get; init; }
+        required public Size2 Size
+            { get; init; }
+        required public int Row
+            { get; init; }
+        required public int Col
+            { get; init; }
+        public U Data;
+        public void Draw(SpriteBatch spriteBatch)
+        {
+            spriteBatch.DrawRectangle(new(Position, Size + new Size2(1, 1)), Color, 1f, LayerDepth.Debug);
+            spriteBatch.DrawText(Data.ToString(), Position + ((Vector2)Size * .4f), Color, LayerDepth.Debug);
+        }
+        public override string ToString()
+            => $"{{Color:{Color} Position:{Position} Size:{Size} Row:{Row} Col:{Col} Data:{Data}}}";
+    } 
 }
