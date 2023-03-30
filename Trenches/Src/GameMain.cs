@@ -119,10 +119,16 @@ public class GameMain : GameBase
                 Log.Information($"Entity:{entity.Get<Transform2>().Position} World:{entity.Get<Transform2>().WorldPosition}");
                 Log.Debug("");
             }
-            if (args.Button == MouseButton.Right)
+            if (args.Button == MouseButton.Left)
             {
-                grid[0,0]++;
-                Log.Information($"Data:{grid[0, 0]}");
+                var pos = camera.ScreenToWorld(args.Position);
+                var rect = new RectangleF(pos, new Size2(128, 128));
+                var cells = grid.GetOverlappingCells(rect);
+                foreach (var cell in cells)
+                {
+                    cell.Data++;
+                    Log.Information($"Cell:{cell}");
+                }
             }
         };
         keyboard.KeyPressed += (sender, args) => 

@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Trenches.Pathing;
 class Grid<T>
 {
@@ -23,23 +26,23 @@ class Grid<T>
                         Col = col
                     };
     }
-    public Point ScreenToIndex(Vector2 position)
+    public Point WorldToIndex(Vector2 position)
         => (Size)(Size2)((position - Position) / CellSize);
-    public Vector2 IndexToScreen(int row, int col)
+    public Vector2 IndexToWorld(int row, int col)
         => (new Vector2(row, col) * CellSize) + Position;
     /* This is used to index from a world position */
     public T this[Vector2 position] 
     {
         get
         {
-            var (row, col) = ScreenToIndex(position);
+            var (row, col) = WorldToIndex(position);
             if (row >= Rows || col >= Cols || row < 0 || col < 0)
                 return default(T);
             return _cells[row, col].Data;
         }
         set
         {
-            var (row, col) = ScreenToIndex(position);
+            var (row, col) = WorldToIndex(position);
             if (row >= Rows || col >= Cols || row < 0 || col < 0)
                 return;
             _cells[row, col].Data = value;
@@ -53,13 +56,20 @@ class Grid<T>
         set 
             => _cells[row, col].Data = value;
     }
-
-    public void Set(Vector2 position, T value)
+    public IEnumerable<Cell<T>> GetOverlappingCells(RectangleF rect)
     {
-        var (row, col) = ScreenToIndex(position);
-        if (row >= Rows || col >= Cols || row < 0 || col < 0)
-            return;
-        _cells[row, col].Data = value;
+        // find indices
+        var (left, top) = WorldToIndex(rect.TopLeft); // Start indices
+        var (right, bottom) = WorldToIndex(rect.BottomRight); // End indices
+        Log.Information($"left:{left} right:{right} top:{top} bot:{bottom}");
+
+        // create subarray
+        var sizeX = right - left + 1;
+        var sizeY = bottom - top + 1;
+        var subArray = Enumerable.Range(left, sizeX)
+                                 .SelectMany(i => Enumerable.Range(top, sizeY)
+                                 .Select(j => _cells[i, j]));
+        return subArray;
     }
     public void Draw(SpriteBatch spriteBatch)
     {
