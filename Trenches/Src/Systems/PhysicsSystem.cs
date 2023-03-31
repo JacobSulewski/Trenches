@@ -16,7 +16,6 @@ class PhysicsSystem : EntityProcessingSystem
         var elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
         transform.Position += physics.Velocity * elapsedTime;
-        // See Physics Component for explanation
-        //physics.Velocity += physics.Acceleration * elapsedTime;
+        physics.Velocity += physics.Acceleration * elapsedTime;
     }
 }

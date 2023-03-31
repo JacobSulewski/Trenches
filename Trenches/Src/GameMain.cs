@@ -77,6 +77,9 @@ public class GameMain : GameBase
         builder.RegisterType<CameraSystem>()
             .PropertiesAutowired()
             .SingleInstance();
+        builder.Register(c => new WorldSystem(new(Width, Height)))
+            .PropertiesAutowired()
+            .SingleInstance();
         
         builder.Register(c => new WorldBuilder()
                 .AddSystem(c.Resolve<MoveSystem>())
@@ -106,7 +109,7 @@ public class GameMain : GameBase
         var infantryman = Container.Resolve<InfantryFactory>().Create();
         var grid = Container.Resolve<Grid<int>>();
 
-        var entity = Container.Resolve<World>().CreateEntity().Add<Transform2>(new()).Add<Physics>(new(100)).Add<Camera>(new());
+        var entity = Container.Resolve<World>().CreateEntity().Add<Transform2>(new()).Add<Physics>(new(200)).Add<Camera>(new());
 
         mouse.MouseClicked += (sender, args) => 
         {
@@ -121,37 +124,35 @@ public class GameMain : GameBase
             }
             if (args.Button == MouseButton.Left)
             {
-                var pos = camera.ScreenToWorld(args.Position);
-                var rect = new RectangleF(pos, new Size2(128, 128));
-                var cells = grid.GetOverlappingCells(rect);
-                foreach (var cell in cells)
-                {
-                    cell.Data++;
-                    Log.Information($"Cell:{cell}");
-                }
+                infantryman.Add<UnitCommand>(new Move(camera.ScreenToWorld(args.Position)));
             }
         };
         keyboard.KeyPressed += (sender, args) => 
         {
             var physics = entity.Get<Physics>();
             if (args.Key == Keys.D)
-                physics.Direction += Vector2.UnitX;
+                physics.Velocity += Vector2.UnitX * physics.Speed;
             if (args.Key == Keys.A)
-                physics.Direction -= Vector2.UnitX;
+                physics.Velocity -= Vector2.UnitX * physics.Speed;
             if (args.Key == Keys.S)
-                physics.Direction += Vector2.UnitY;
+                physics.Velocity += Vector2.UnitY * physics.Speed;
             if (args.Key == Keys.W)
-                physics.Direction -= Vector2.UnitY;
+                physics.Velocity -= Vector2.UnitY * physics.Speed;
             if (args.Key == Keys.G)
                 renderer.Debug = ! renderer.Debug;
+            var transform = infantryman.Get<Transform2>();
+            physics = infantryman.Get<Physics>();
+            var move = (Move)infantryman.Get<UnitCommand>();
+            if (args.Key == Keys.Space)
+                Log.Information($"Pos:{transform.Position} Vel:{physics.Velocity} Tar:{move.Target}");
         };
         keyboard.KeyReleased += (sender, args) => 
         {
             var physics = entity.Get<Physics>();
             if( args.Key == Keys.D || args.Key == Keys.A )
-                physics.Direction *= Vector2.UnitY;
+                physics.Velocity *= Vector2.UnitY;
             if( args.Key == Keys.S ||  args.Key == Keys.W)
-                physics.Direction *= Vector2.UnitX;
+                physics.Velocity *= Vector2.UnitX;
         };
     }
 

@@ -3,31 +3,28 @@ using Trenches.Components;
 namespace Trenches.Systems;
 class MoveSystem : EntityProcessingSystem
 {
-    private ComponentMapper<Transform2> _transformMapper;
-    private ComponentMapper<Physics> _physicsMapper;
-    private ComponentMapper<UnitCommand> _unitCommandMapper;
+    private ComponentMapper<Transform2> _transforms;
+    private ComponentMapper<Physics> _physics;
+    private ComponentMapper<UnitCommand> _unitCommands;
     public MoveSystem()
         : base(Aspect.All(typeof(Transform2), typeof(Physics), typeof(UnitCommand))) { }
     public override void Initialize(IComponentMapperService mapperService)
-    {
-        _transformMapper = mapperService.GetMapper<Transform2>();
-        _physicsMapper = mapperService.GetMapper<Physics>();
-        _unitCommandMapper = mapperService.GetMapper<UnitCommand>();
-    }
+        => (_transforms, _physics, _unitCommands) =
+            (mapperService.Get<Transform2, Physics, UnitCommand>());
     public override void Process(GameTime gameTime, int entityId)
     {
-        var moveCommand = (Move)_unitCommandMapper.Get(entityId);
-        if (moveCommand is null) return;
-        var transfrom = _transformMapper.Get(entityId); 
-        var physics = _physicsMapper.Get(entityId);
+        var command = _unitCommands.Get(entityId);
+        var transfrom = _transforms.Get(entityId); 
+        var physics = _physics.Get(entityId);
 
-        Vector2 direction = moveCommand.Target - transfrom.Position;
-        if (direction.Length() < 3)
+        if (command is not Move move) return;
+        Vector2 direction = move.Target - transfrom.Position;
+        physics.Velocity = direction * physics.Speed;
+
+        if (direction.Length() < 1)
         {
-            physics.Magnitude = 0;
-            _unitCommandMapper.Delete(entityId);
+            physics.Velocity = Vector2.Zero;
+            _unitCommands.Delete(entityId);
         }
-        physics.Direction = direction;
-        physics.Magnitude = physics.Speed;
     }
 }

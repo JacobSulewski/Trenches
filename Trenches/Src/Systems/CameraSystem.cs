@@ -18,8 +18,6 @@ class CameraSystem : EntityUpdateSystem
 
             Camera.LookAt(transform.WorldPosition);
         }
-        //float x = Math.Clamp(Camera.Position.X, 0, 10000);
-        //float y = Math.Clamp(Camera.Position.Y, 0, 10000);
-        //Camera.Position = new(x, y);
+
     }
 }

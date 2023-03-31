@@ -1,15 +1,28 @@
 namespace Trenches;
 static class Extensions {
-    public static Entity Add<T>(this Entity entity) where T : class, new()
-    {
-        entity.Attach<T>(new());
-        return entity;
-    }
-    public static Entity Add<T>(this Entity entity, T component) where T : class 
+    public static Entity Add<T>(this Entity entity, T component)
+        where T : class 
     {
         entity.Attach(component);
         return entity;
     }
+    public static Entity Add<T>(this Entity entity)
+        where T : class, new()
+        => entity.Add<T>(new());
+    public static Entity Add<TBase, T>(this Entity entity)
+        where TBase: class
+        where T : class, TBase, new()
+        => entity.Add<TBase, T>(new());
+    public static Entity Add<TBase, T>(this Entity entity, T component)
+        where TBase : class
+        where T : class, TBase
+        {
+            if (entity.Has<TBase>())
+            {
+                // TODO Delete the current child type from the item
+            }
+            return entity.Add<TBase>(component).Add<T>(component);
+        }
     public static void Deconstruct(this RectangleF rect, out float x, out float y, out float width, out float height)
         => ((x, y), (width, height)) = (rect.Size, rect.Position);
     public static void Deconstruct(this RectangleF rect, out Vector2 position, out Vector2 size)
@@ -43,4 +56,11 @@ static class Extensions {
         where T3 : class
         where T4 : class
         => (service.GetMapper<T1>(), service.GetMapper<T2>(), service.GetMapper<T3>(), service.GetMapper<T4>());
+
+    public static void Clamp(this IMovable movable, RectangleF bounds)
+    {
+            float x = Math.Clamp(movable.Position.X, 0, bounds.Width);
+            float y = Math.Clamp(movable.Position.Y, 0, bounds.Height);
+            movable.Position = new(x,y);
+    }
 }

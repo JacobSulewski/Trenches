@@ -9,9 +9,9 @@ class Grid<T>
     public readonly Size2 CellSize;
     public readonly Size2 Size;
     public int Rows
-        => (int)(Size.Height / CellSize.Height);
-    public int Cols
         => (int)(Size.Width / CellSize.Width);
+    public int Cols
+        => (int)(Size.Height / CellSize.Height);
     public Grid(RectangleF rect, Point2 cellSize) 
     {     
         ((Position, Size), CellSize) = (rect, cellSize);
