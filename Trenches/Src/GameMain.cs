@@ -77,7 +77,7 @@ public class GameMain : GameBase
         builder.RegisterType<CameraSystem>()
             .PropertiesAutowired()
             .SingleInstance();
-        builder.Register(c => new WorldSystem(new(Width, Height)))
+        builder.Register(c => new WorldSystem(Width, Height))
             .PropertiesAutowired()
             .SingleInstance();
         

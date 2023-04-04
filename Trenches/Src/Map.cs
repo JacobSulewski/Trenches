@@ -1,0 +1,2 @@
+namespace Trenches;
+class Map{}

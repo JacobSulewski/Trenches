@@ -9,20 +9,16 @@ static class Extensions {
     public static Entity Add<T>(this Entity entity)
         where T : class, new()
         => entity.Add<T>(new());
-    public static Entity Add<TBase, T>(this Entity entity)
-        where TBase: class
-        where T : class, TBase, new()
-        => entity.Add<TBase, T>(new());
-    public static Entity Add<TBase, T>(this Entity entity, T component)
-        where TBase : class
-        where T : class, TBase
-        {
-            if (entity.Has<TBase>())
-            {
-                // TODO Delete the current child type from the item
-            }
-            return entity.Add<TBase>(component).Add<T>(component);
-        }
+
+    public static ValueTuple<T1, T2> Get<T1, T2>(this Entity entity)
+        where T1 : class
+        where T2 : class
+        => (entity.Get<T1>(), entity.Get<T2>());
+    public static ValueTuple<T1, T2, T3> Get<T1, T2, T3>(this Entity entity)
+        where T1 : class
+        where T2 : class
+        where T3 : class
+        => (entity.Get<T1>(), entity.Get<T2>(), entity.Get<T3>());
     public static void Deconstruct(this RectangleF rect, out float x, out float y, out float width, out float height)
         => ((x, y), (width, height)) = (rect.Size, rect.Position);
     public static void Deconstruct(this RectangleF rect, out Vector2 position, out Vector2 size)
