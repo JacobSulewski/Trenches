@@ -13,9 +13,8 @@ class PhysicsSystem : EntityProcessingSystem
     {
         var transform = _transforms.Get(entityId);
         var physics = _physics.Get(entityId);
-        var elapsedTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
 
-        transform.Position += physics.Velocity * elapsedTime;
-        physics.Velocity += physics.Acceleration * elapsedTime;
+        transform.Position += physics.Velocity * gameTime.GetElapsedSeconds();
+        physics.Velocity += physics.Acceleration * gameTime.GetElapsedSeconds();
     }
 }

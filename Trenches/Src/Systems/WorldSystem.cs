@@ -1,25 +1,22 @@
 namespace Trenches.Systems;
 class WorldSystem : EntityUpdateSystem
 {
-    private ComponentMapper<Transform2> _transforms;
-    public readonly Size2 Size;
-    public readonly int Width;
-    public readonly int Height;
+    ComponentMapper<Transform2> _transforms;
+    Map _map;
     public OrthographicCamera Camera
         { private get; init;}
-    public WorldSystem(int width, int height)
+    public WorldSystem(Map map)
         : base(Aspect.All(typeof(Transform2)))
-        => (Width, Height) = (width, height);
+        => (_map) = (map);
     public override void Initialize(IComponentMapperService mapperService)
         => (_transforms) = (mapperService.Get<Transform2>());
     public override void Update(GameTime gameTime)
     {
-        float x, y;
         foreach (var entity in ActiveEntities)
         {
             var transform = _transforms.Get(entity);
-            transform.Clamp(new(0, 0, Width, Height));
+            transform.ClampWithin(_map.Bounds);
         }
-        Camera.Clamp(new(0, 0, Width, Height));
+        Camera.ClampWithin(_map.Bounds);
     }
 }

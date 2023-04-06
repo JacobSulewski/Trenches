@@ -5,11 +5,11 @@ using MonoGame.Extended.Input.InputListeners;
 using Trenches.Components;
 using Trenches.Systems;
 using Trenches.Factories;
-using Trenches.Pathing;
 
 namespace Trenches;
 public class GameMain : GameBase
 {
+    public const int PIXELS = 32;
     public GameMain(int width = 800, int height = 480)
         : base(width, height) { }
     protected override void RegisterDependencies(ContainerBuilder builder)
@@ -26,8 +26,13 @@ public class GameMain : GameBase
         builder.RegisterInstance(Content);
         builder.RegisterInstance(this)
             .As<Game>();
-        builder.Register(c => new CollisionComponent(new(0, 0, Width, Height)));
-        builder.Register(c => new Grid<int>(new (0, 0, Width, Height), new(32, 32)))
+        builder.RegisterType<CollisionComponent>()
+            .WithParameter("boundary", new RectangleF(0, 0, Width, Height))
+            .SingleInstance();
+        builder.RegisterType<Map>()
+            .WithParameter("width", Width)
+            .WithParameter("height", Height)
+            .PropertiesAutowired()
             .SingleInstance();
     }
     private void RegisterGraphics(ContainerBuilder builder)
@@ -77,7 +82,7 @@ public class GameMain : GameBase
         builder.RegisterType<CameraSystem>()
             .PropertiesAutowired()
             .SingleInstance();
-        builder.Register(c => new WorldSystem(Width, Height))
+        builder.RegisterType<WorldSystem>()
             .PropertiesAutowired()
             .SingleInstance();
         
@@ -86,6 +91,7 @@ public class GameMain : GameBase
                 .AddSystem(c.Resolve<PhysicsSystem>())
                 .AddSystem(c.Resolve<RenderSystem>())
                 .AddSystem(c.Resolve<CameraSystem>())
+                .AddSystem(c.Resolve<WorldSystem>())
                 .Build())
             .SingleInstance();
     }
@@ -107,7 +113,6 @@ public class GameMain : GameBase
         var renderer = Container.Resolve<RenderSystem>();
         var camera = Container.Resolve<OrthographicCamera>();
         var infantryman = Container.Resolve<InfantryFactory>().Create();
-        var grid = Container.Resolve<Grid<int>>();
 
         var entity = Container.Resolve<World>().CreateEntity().Add<Transform2>(new()).Add<Physics>(new(200)).Add<Camera>(new());
 
@@ -124,7 +129,7 @@ public class GameMain : GameBase
             }
             if (args.Button == MouseButton.Left)
             {
-                infantryman.Add<UnitCommand>(new Move(camera.ScreenToWorld(args.Position)));
+                infantryman.Add<UnitAction>(new Move(camera.ScreenToWorld(args.Position)));
             }
         };
         keyboard.KeyPressed += (sender, args) => 
@@ -142,7 +147,7 @@ public class GameMain : GameBase
                 renderer.Debug = ! renderer.Debug;
             var transform = infantryman.Get<Transform2>();
             physics = infantryman.Get<Physics>();
-            var move = (Move)infantryman.Get<UnitCommand>();
+            var move = (Move)infantryman.Get<UnitAction>();
             if (args.Key == Keys.Space)
                 Log.Information($"Pos:{transform.Position} Vel:{physics.Velocity} Tar:{move.Target}");
         };

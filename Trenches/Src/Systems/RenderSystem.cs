@@ -1,16 +1,15 @@
 using Trenches.Components;
-using Trenches.Pathing;
 
 namespace Trenches.Systems;
 class RenderSystem : EntityDrawSystem
 {
-    private ComponentMapper<AnimatedSprite> _animatedSprites;
-    private ComponentMapper<Sprite> _sprites;
-    private ComponentMapper<Transform2> _transforms;
-    private ComponentMapper<Collider> _colliders;
+    ComponentMapper<AnimatedSprite> _animatedSprites;
+    ComponentMapper<Sprite> _sprites;
+    ComponentMapper<Transform2> _transforms;
+    ComponentMapper<Collider> _colliders;
     public bool Debug;
-    public Grid<int> Grid 
-        { private get; init; }
+    public Map Map 
+        {private get; init; }
     required public SpriteBatch SpriteBatch 
         { private get; init; }
     required public OrthographicCamera Camera 
@@ -27,6 +26,7 @@ class RenderSystem : EntityDrawSystem
     {
         SpriteBatch.Begin(samplerState: SamplerState.PointClamp, transformMatrix: Camera.GetViewMatrix());
 
+        Map.Draw(SpriteBatch, Debug);
         foreach (var entity in ActiveEntities)
         {
             var transform = _transforms.Get(entity);
@@ -44,10 +44,7 @@ class RenderSystem : EntityDrawSystem
         }
         
         if (Debug)
-        {
-            Grid?.Draw(SpriteBatch);
             SpriteBatch.DrawText(Camera.Position.ToString(), Camera.Position, Color.Black, LayerDepth.Debug);
-        }
         SpriteBatch.End();
     }
 }

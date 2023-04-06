@@ -53,7 +53,7 @@ static class Extensions {
         where T4 : class
         => (service.GetMapper<T1>(), service.GetMapper<T2>(), service.GetMapper<T3>(), service.GetMapper<T4>());
 
-    public static void Clamp(this IMovable movable, RectangleF bounds)
+    public static void ClampWithin(this IMovable movable, RectangleF bounds)
     {
             float x = Math.Clamp(movable.Position.X, 0, bounds.Width);
             float y = Math.Clamp(movable.Position.Y, 0, bounds.Height);

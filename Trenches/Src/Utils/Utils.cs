@@ -1,7 +1,7 @@
 using MonoGame.Extended.BitmapFonts;
 
 namespace Trenches;
-public static class Utils 
+static class Utils 
 {
     private static ContentManager Content;
 
@@ -13,11 +13,4 @@ public static class Utils
         var spriteFont = Content.Load<SpriteFont>($"Fonts/{font}");
         spriteBatch.DrawString(spriteFont, text, position, color, 0, Vector2.Zero, 1, SpriteEffects.None, layerDepth);
     } 
-
-    public static Point2 Clamp(Point2 vector, RectangleF bounds)
-    {
-            float x = Math.Clamp(vector.X, 0, bounds.Width);
-            float y = Math.Clamp(vector.Y, 0, bounds.Height);
-            return new(x,y);
-    }
 }

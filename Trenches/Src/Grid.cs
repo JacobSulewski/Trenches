@@ -1,27 +1,26 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Trenches.Pathing;
+namespace Trenches;
 class Grid<T>
 {
     private Cell<T>[,] _cells;
     public readonly Vector2 Position;
-    public readonly Size2 CellSize;
-    public readonly Size2 Size;
-    public int Rows
-        => (int)(Size.Width / CellSize.Width);
-    public int Cols
-        => (int)(Size.Height / CellSize.Height);
-    public Grid(RectangleF rect, Point2 cellSize) 
+    public readonly float CellSize;
+    public readonly int Rows;
+    public readonly int Cols;
+    public RectangleF BoundingRectangle
+        => new(Position, new Vector2(Rows, Cols) * CellSize);
+    public Grid(Vector2 position, int rows, int cols, int cellSize) 
     {     
-        ((Position, Size), CellSize) = (rect, cellSize);
+        (Position, Rows, Cols, CellSize) = (position, rows, cols, cellSize);
         _cells = new Cell<T>[Rows, Cols]; 
         for (int row = 0; row < Rows; ++row)
             for (int col = 0; col < Cols; ++col)
                 _cells[row, col] = new Cell<T>
                     {
                         Position = Position + (new Vector2(row, col) * CellSize),
-                        Size = CellSize,
+                        Size = Vector2.One * CellSize,
                         Row = row,
                         Col = col
                     };
@@ -30,25 +29,23 @@ class Grid<T>
         => (Size)(Size2)((position - Position) / CellSize);
     public Vector2 IndexToWorld(int row, int col)
         => (new Vector2(row, col) * CellSize) + Position;
-    /* This is used to index from a world position */
-    public T this[Vector2 position] 
+    public T this[Vector2 worldPosition] 
     {
         get
         {
-            var (row, col) = WorldToIndex(position);
+            var (row, col) = WorldToIndex(worldPosition);
             if (row >= Rows || col >= Cols || row < 0 || col < 0)
                 return default(T);
             return _cells[row, col].Data;
         }
         set
         {
-            var (row, col) = WorldToIndex(position);
+            var (row, col) = WorldToIndex(worldPosition);
             if (row >= Rows || col >= Cols || row < 0 || col < 0)
                 return;
             _cells[row, col].Data = value;
         }
     }
-    /* This is used to index from a Grid index */
     public T this[int row, int col] 
     { 
         get 
@@ -61,7 +58,6 @@ class Grid<T>
         // find indices
         var (left, top) = WorldToIndex(rect.TopLeft); // Start indices
         var (right, bottom) = WorldToIndex(rect.BottomRight); // End indices
-        Log.Information($"left:{left} right:{right} top:{top} bot:{bottom}");
 
         // create subarray
         var sizeX = right - left + 1;
