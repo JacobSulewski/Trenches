@@ -17,6 +17,6 @@ class WorldSystem : EntityUpdateSystem
             var transform = _transforms.Get(entity);
             transform.ClampWithin(_map.Bounds);
         }
-        Camera.ClampWithin(_map.Bounds);
+        // Camera.ClampWithin(_map.Bounds);
     }
 }

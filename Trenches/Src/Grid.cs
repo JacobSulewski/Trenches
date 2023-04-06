@@ -19,7 +19,7 @@ class Grid<T>
             for (int col = 0; col < Cols; ++col)
                 _cells[row, col] = new Cell<T>
                     {
-                        Position = Position + (new Vector2(row, col) * CellSize),
+                        Position = Position + (new Vector2(col, row) * CellSize),
                         Size = Vector2.One * CellSize,
                         Row = row,
                         Col = col
@@ -29,23 +29,6 @@ class Grid<T>
         => (Size)(Size2)((position - Position) / CellSize);
     public Vector2 IndexToWorld(int row, int col)
         => (new Vector2(row, col) * CellSize) + Position;
-    public T this[Vector2 worldPosition] 
-    {
-        get
-        {
-            var (row, col) = WorldToIndex(worldPosition);
-            if (row >= Rows || col >= Cols || row < 0 || col < 0)
-                return default(T);
-            return _cells[row, col].Data;
-        }
-        set
-        {
-            var (row, col) = WorldToIndex(worldPosition);
-            if (row >= Rows || col >= Cols || row < 0 || col < 0)
-                return;
-            _cells[row, col].Data = value;
-        }
-    }
     public T this[int row, int col] 
     { 
         get 
@@ -53,6 +36,8 @@ class Grid<T>
         set 
             => _cells[row, col].Data = value;
     }
+    public Cell<T> GetCell(int row, int col)
+        => _cells[row, col];
     public IEnumerable<Cell<T>> GetOverlappingCells(RectangleF rect)
     {
         // find indices
@@ -88,8 +73,8 @@ class Grid<T>
         public U Data;
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.DrawRectangle(new(Position, Size + new Size2(1, 1)), Color, 1f, LayerDepth.Debug);
-            spriteBatch.DrawText(Data.ToString(), Position + ((Vector2)Size * .4f), Color, LayerDepth.Debug);
+            spriteBatch.DrawRectangle(new(Position, Size + new Size2(1, 1) /* Offset so lines overlap nicely */), Color, 1f, LayerDepth.Debug);
+            // spriteBatch.DrawText(Data.ToString(), Position + ((Vector2)Size * .4f), Color, LayerDepth.Debug);
         }
         public override string ToString()
             => $"{{Color:{Color} Position:{Position} Size:{Size} Row:{Row} Col:{Col} Data:{Data}}}";
