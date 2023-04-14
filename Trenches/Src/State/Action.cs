@@ -14,7 +14,7 @@ interface IActions
 
 class Action : IActions
 {
-    protected ActionState State;
+    public ActionState State;
     public IActions Stop()
         => State.Stop();
     public IActions Move(Vector2 target)
@@ -26,6 +26,11 @@ class Action : IActions
     {
         required public Action Context
             { protected get; init; }
+        protected T Cache<T>()
+            where T : ActionState
+        {
+            return null; // TODO
+        }
         protected IActions Set<T>(T state)
             where T: ActionState
             => Context.State = state;
@@ -41,7 +46,10 @@ class Action : IActions
 class Idle: Action.ActionState
 {
     public override IActions Move(Vector2 target)
-        => Set(new Moving{Context=Context}).Move(target);
+        //=> Set(new Moving{Context=Context}).Move(target);
+    {
+        Context.State = new Moving{Context=Context};
+    }
 }
 
 class Moving: Action.ActionState
