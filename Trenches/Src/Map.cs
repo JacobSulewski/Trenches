@@ -8,26 +8,25 @@ enum Tile: int
 }
 class Map
 {
-    Grid<Texture2D> _grid; // This is an int so that debug grid looks nicer
-    Dictionary<Tile, Texture2D> _textureLookupTable;
+    readonly Grid<int> _grid; // This is an int so that debug grid looks nicer
+    readonly Dictionary<Tile, Texture2D> _textureLookup;
+    readonly ContentManager Content;
     public readonly RectangleF Bounds;
-    required public ContentManager Content
-        { private get; init; }
-    public Map(int width, int height)
+    public Map(ContentManager content, int width, int height)
     {
-        Bounds = new(0, 0, width, height);
-        _textureLookupTable = new()
+        (Content, Bounds) = (content, new(0, 0, width, height));
+        _textureLookup = new()
         {
             {Tile.Ground, Content.Load<Texture2D>("Sprites/ground")},
             {Tile.Trench, Content.Load<Texture2D>("Sprites/trench")},
         };
-        var rows = height / GameMain.PIXELS;
-        var cols = width / GameMain.PIXELS;
+        var rows = height / GameMain.PIXELS; // TODO: Hard coded
+        var cols = width / GameMain.PIXELS; // TODO: Hard coded
         _grid = new(Vector2.Zero, rows, cols, GameMain.PIXELS);
         for (int row = 0; row < rows; ++row)
             for (int col = 0; col < cols; ++col)
             {
-                _grid[row, col] = _textureLookupTable[Tile.Ground];
+                _grid[row, col] = (int)Tile.Ground;
             }
     }
     
@@ -35,16 +34,17 @@ class Map
     {
         for (var row = 0; row < _grid.Rows; ++row)
             for (var col = 0; col < _grid.Cols; ++col)
-            { 
+            {
                 var cell = _grid.GetCell(row, col);
+                var texture = _textureLookup[(Tile)cell.Data]; 
                 spriteBatch.Draw(
-                    cell.Data,
+                    texture,
                     cell.Position,
-                    cell.Data.Bounds,
+                    texture.Bounds,
                     Color.White,
                     0,
                     Vector2.Zero,
-                    Vector2.One * 4,
+                    Vector2.One * 4, // TODO: Hard coded
                     SpriteEffects.None,
                     LayerDepth.Background
                 );

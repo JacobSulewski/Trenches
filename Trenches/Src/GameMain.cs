@@ -32,7 +32,6 @@ public class GameMain : GameBase
         builder.RegisterType<Map>()
             .WithParameter("width", Width)
             .WithParameter("height", Height)
-            .PropertiesAutowired()
             .SingleInstance();
     }
     private void RegisterGraphics(ContainerBuilder builder)

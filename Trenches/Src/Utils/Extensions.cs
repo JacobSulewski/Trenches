@@ -10,11 +10,11 @@ static class Extensions {
         where T : class, new()
         => entity.Add<T>(new());
 
-    public static ValueTuple<T1, T2> Get<T1, T2>(this Entity entity)
+    public static (T1, T2) Get<T1, T2>(this Entity entity)
         where T1 : class
         where T2 : class
         => (entity.Get<T1>(), entity.Get<T2>());
-    public static ValueTuple<T1, T2, T3> Get<T1, T2, T3>(this Entity entity)
+    public static (T1, T2, T3) Get<T1, T2, T3>(this Entity entity)
         where T1 : class
         where T2 : class
         where T3 : class
@@ -37,16 +37,16 @@ static class Extensions {
     public static ComponentMapper<T> Get<T>(this IComponentMapperService service) where T : class
         => service.GetMapper<T>();
 
-    public static ValueTuple<ComponentMapper<T1>, ComponentMapper<T2>> Get<T1, T2>(this IComponentMapperService service) 
+    public static (ComponentMapper<T1>, ComponentMapper<T2>) Get<T1, T2>(this IComponentMapperService service) 
         where T1 : class
         where T2 : class
         => (service.GetMapper<T1>(), service.GetMapper<T2>());
-    public static ValueTuple<ComponentMapper<T1>, ComponentMapper<T2>, ComponentMapper<T3>> Get<T1, T2, T3>(this IComponentMapperService service) 
+    public static (ComponentMapper<T1>, ComponentMapper<T2>, ComponentMapper<T3>) Get<T1, T2, T3>(this IComponentMapperService service) 
         where T1 : class
         where T2 : class
         where T3 : class
         => (service.GetMapper<T1>(), service.GetMapper<T2>(), service.GetMapper<T3>());
-    public static ValueTuple<ComponentMapper<T1>, ComponentMapper<T2>, ComponentMapper<T3>, ComponentMapper<T4>> Get<T1, T2, T3, T4>(this IComponentMapperService service) 
+    public static (ComponentMapper<T1>, ComponentMapper<T2>, ComponentMapper<T3>, ComponentMapper<T4>) Get<T1, T2, T3, T4>(this IComponentMapperService service) 
         where T1 : class
         where T2 : class
         where T3 : class

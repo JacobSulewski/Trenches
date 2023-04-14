@@ -74,7 +74,7 @@ class Grid<T>
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.DrawRectangle(new(Position, Size + new Size2(1, 1) /* Offset so lines overlap nicely */), Color, 1f, LayerDepth.Debug);
-            // spriteBatch.DrawText(Data.ToString(), Position + ((Vector2)Size * .4f), Color, LayerDepth.Debug);
+            spriteBatch.DrawText(Data.ToString(), Position + ((Vector2)Size * .4f), Color, LayerDepth.Debug);
         }
         public override string ToString()
             => $"{{Color:{Color} Position:{Position} Size:{Size} Row:{Row} Col:{Col} Data:{Data}}}";
